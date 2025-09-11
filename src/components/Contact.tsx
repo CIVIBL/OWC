@@ -9,12 +9,40 @@ const Contact = () => {
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real implementation, this would send the form data to a backend
-    console.log('Form submitted:', formData);
-    alert('Thank you for your interest! I\'ll get back to you soon via Discord or email.');
-    setFormData({ name: '', email: '', experience: '', message: '' });
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    
+    try {
+      const response = await fetch('/contact-form.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSubmitStatus('success');
+        setStatusMessage('Thank you! Your message has been sent. I\'ll get back to you soon via Discord or email.');
+        setFormData({ name: '', email: '', experience: '', message: '' });
+      } else {
+        setSubmitStatus('error');
+        setStatusMessage(result.message || 'Something went wrong. Please try again or contact me directly on Discord.');
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+      setStatusMessage('Network error. Please check your connection or contact me directly on Discord.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -87,6 +115,19 @@ const Contact = () => {
             <div className="bg-gray-900 p-8 rounded-xl">
               <h3 className="text-2xl font-bold text-white mb-6">Send Me a Message</h3>
               
+              {/* Status Messages */}
+              {submitStatus === 'success' && (
+                <div className="mb-6 p-4 bg-green-900/50 border border-green-700 rounded-lg">
+                  <p className="text-green-300">{statusMessage}</p>
+                </div>
+              )}
+              
+              {submitStatus === 'error' && (
+                <div className="mb-6 p-4 bg-red-900/50 border border-red-700 rounded-lg">
+                  <p className="text-red-300">{statusMessage}</p>
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
@@ -97,9 +138,10 @@ const Contact = () => {
                     id="name"
                     name="name"
                     required
+                    disabled={isSubmitting}
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors disabled:opacity-50"
                     placeholder="Your name"
                   />
                 </div>
@@ -113,9 +155,10 @@ const Contact = () => {
                     id="email"
                     name="email"
                     required
+                    disabled={isSubmitting}
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors disabled:opacity-50"
                     placeholder="your.email@example.com"
                   />
                 </div>
@@ -128,9 +171,10 @@ const Contact = () => {
                     id="experience"
                     name="experience"
                     required
+                    disabled={isSubmitting}
                     value={formData.experience}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors disabled:opacity-50"
                   >
                     <option value="">Select your level</option>
                     <option value="new">New to Warhammer: The Old World</option>
@@ -150,18 +194,20 @@ const Contact = () => {
                     name="message"
                     required
                     rows={4}
+                    disabled={isSubmitting}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors resize-none"
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors resize-none disabled:opacity-50"
                     placeholder="Tell me about your goals, current challenges, or any specific areas you'd like to focus on..."
                   ></textarea>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
+                  disabled={isSubmitting}
+                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center space-x-2"
                 >
-                  <span>Send Message</span>
+                  <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                   <Send className="h-5 w-5" />
                 </button>
               </form>
