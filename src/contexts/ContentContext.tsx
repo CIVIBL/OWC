@@ -115,14 +115,6 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
           setContent(data);
           console.log('Content loaded from API:', data);
         } else {
-            // Replace defaults with loaded content, keeping defaults for missing fields
-            foreach ($default_content as $section => $fields) {
-                if (isset($content[$section])) {
-                    $content[$section] = array_merge($fields, $content[$section]);
-                } else {
-                    $content[$section] = $fields;
-                }
-            }
           setContent(defaultContent);
         }
       } else {
