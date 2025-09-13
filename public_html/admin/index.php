@@ -21,56 +21,6 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-// Handle content save
-if (isset($_POST['save_content']) && isset($_SESSION['admin_logged_in'])) {
-    $content = [
-        'hero' => [
-            'title' => $_POST['hero_title'] ?? '',
-            'subtitle' => $_POST['hero_subtitle'] ?? '',
-            'cta_text' => $_POST['hero_cta_text'] ?? ''
-        ],
-        'about' => [
-            'name' => $_POST['about_name'] ?? '',
-            'title' => $_POST['about_title'] ?? '',
-            'description' => $_POST['about_description'] ?? '',
-            'extended_description' => $_POST['about_extended_description'] ?? '',
-            'discord' => $_POST['about_discord'] ?? ''
-        ],
-        'services' => [
-            'title' => $_POST['services_title'] ?? '',
-            'beginner_title' => $_POST['services_beginner_title'] ?? '',
-            'beginner_subtitle' => $_POST['services_beginner_subtitle'] ?? '',
-            'competitive_title' => $_POST['services_competitive_title'] ?? '',
-            'competitive_subtitle' => $_POST['services_competitive_subtitle'] ?? '',
-            'additional_info' => $_POST['services_additional_info'] ?? ''
-        ],
-        'approach' => [
-            'title' => $_POST['approach_title'] ?? '',
-            'intro' => $_POST['approach_intro'] ?? ''
-        ],
-        'contact' => [
-            'title' => $_POST['contact_title'] ?? '',
-            'subtitle' => $_POST['contact_subtitle'] ?? '',
-            'discord' => $_POST['contact_discord'] ?? '',
-            'form_title' => $_POST['contact_form_title'] ?? ''
-        ]
-    ];
-    
-    if (file_put_contents($content_file, json_encode($content, JSON_PRETTY_PRINT))) {
-        $save_success = 'Content saved successfully!';
-        // Update current_content with the newly saved data
-        $current_content = $content;
-    } else {
-        $save_error = 'Failed to save content. Check file permissions.';
-    }
-}
-
-// Load existing content
-$current_content = [];
-if (file_exists($content_file)) {
-    $current_content = json_decode(file_get_contents($content_file), true) ?? [];
-}
-
 // Default content structure
 $default_content = [
     'hero' => [
@@ -105,8 +55,60 @@ $default_content = [
     ]
 ];
 
-// Merge with defaults to ensure all fields exist
-$content = array_merge_recursive($default_content, $current_content);
+// Handle content save
+if (isset($_POST['save_content']) && isset($_SESSION['admin_logged_in'])) {
+    $content = [
+        'hero' => [
+            'title' => $_POST['hero_title'] ?? $default_content['hero']['title'],
+            'subtitle' => $_POST['hero_subtitle'] ?? $default_content['hero']['subtitle'],
+            'cta_text' => $_POST['hero_cta_text'] ?? $default_content['hero']['cta_text']
+        ],
+        'about' => [
+            'name' => $_POST['about_name'] ?? $default_content['about']['name'],
+            'title' => $_POST['about_title'] ?? $default_content['about']['title'],
+            'description' => $_POST['about_description'] ?? $default_content['about']['description'],
+            'extended_description' => $_POST['about_extended_description'] ?? $default_content['about']['extended_description'],
+            'discord' => $_POST['about_discord'] ?? $default_content['about']['discord']
+        ],
+        'services' => [
+            'title' => $_POST['services_title'] ?? $default_content['services']['title'],
+            'beginner_title' => $_POST['services_beginner_title'] ?? $default_content['services']['beginner_title'],
+            'beginner_subtitle' => $_POST['services_beginner_subtitle'] ?? $default_content['services']['beginner_subtitle'],
+            'competitive_title' => $_POST['services_competitive_title'] ?? $default_content['services']['competitive_title'],
+            'competitive_subtitle' => $_POST['services_competitive_subtitle'] ?? $default_content['services']['competitive_subtitle'],
+            'additional_info' => $_POST['services_additional_info'] ?? $default_content['services']['additional_info']
+        ],
+        'approach' => [
+            'title' => $_POST['approach_title'] ?? $default_content['approach']['title'],
+            'intro' => $_POST['approach_intro'] ?? $default_content['approach']['intro']
+        ],
+        'contact' => [
+            'title' => $_POST['contact_title'] ?? $default_content['contact']['title'],
+            'subtitle' => $_POST['contact_subtitle'] ?? $default_content['contact']['subtitle'],
+            'discord' => $_POST['contact_discord'] ?? $default_content['contact']['discord'],
+            'form_title' => $_POST['contact_form_title'] ?? $default_content['contact']['form_title']
+        ]
+    ];
+    
+    if (file_put_contents($content_file, json_encode($content, JSON_PRETTY_PRINT))) {
+        $save_success = 'Content saved successfully!';
+        $current_content = $content; // Update current content with saved data
+    } else {
+        $save_error = 'Failed to save content. Check file permissions.';
+    }
+}
+
+// Load existing content or use defaults
+$current_content = $default_content;
+if (file_exists($content_file)) {
+    $file_content = file_get_contents($content_file);
+    if ($file_content !== false) {
+        $loaded_content = json_decode($file_content, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($loaded_content)) {
+            $current_content = array_merge_recursive($default_content, $loaded_content);
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -212,6 +214,8 @@ $content = array_merge_recursive($default_content, $current_content);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn:hover {
@@ -355,16 +359,16 @@ $content = array_merge_recursive($default_content, $current_content);
                         <h3>Hero Section</h3>
                         <div class="form-group">
                             <label for="hero_title">Main Title:</label>
-                            <input type="text" id="hero_title" name="hero_title" value="<?php echo htmlspecialchars($content['hero']['title']); ?>">
+                            <input type="text" id="hero_title" name="hero_title" value="<?php echo htmlspecialchars($current_content['hero']['title']); ?>">
                             <div class="help-text">Use HTML like &lt;span class="text-amber-500"&gt;Old World&lt;/span&gt; for styling</div>
                         </div>
                         <div class="form-group">
                             <label for="hero_subtitle">Subtitle:</label>
-                            <textarea id="hero_subtitle" name="hero_subtitle"><?php echo htmlspecialchars($content['hero']['subtitle']); ?></textarea>
+                            <textarea id="hero_subtitle" name="hero_subtitle"><?php echo htmlspecialchars($current_content['hero']['subtitle']); ?></textarea>
                         </div>
                         <div class="form-group">
                             <label for="hero_cta_text">CTA Button Text:</label>
-                            <input type="text" id="hero_cta_text" name="hero_cta_text" value="<?php echo htmlspecialchars($content['hero']['cta_text']); ?>">
+                            <input type="text" id="hero_cta_text" name="hero_cta_text" value="<?php echo htmlspecialchars($current_content['hero']['cta_text']); ?>">
                         </div>
                     </div>
 
@@ -374,25 +378,25 @@ $content = array_merge_recursive($default_content, $current_content);
                         <div class="grid">
                             <div class="form-group">
                                 <label for="about_name">Coach Name:</label>
-                                <input type="text" id="about_name" name="about_name" value="<?php echo htmlspecialchars($content['about']['name']); ?>">
+                                <input type="text" id="about_name" name="about_name" value="<?php echo htmlspecialchars($current_content['about']['name']); ?>">
                             </div>
                             <div class="form-group">
                                 <label for="about_discord">Discord Username:</label>
-                                <input type="text" id="about_discord" name="about_discord" value="<?php echo htmlspecialchars($content['about']['discord']); ?>">
+                                <input type="text" id="about_discord" name="about_discord" value="<?php echo htmlspecialchars($current_content['about']['discord']); ?>">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="about_title">Section Title:</label>
-                            <input type="text" id="about_title" name="about_title" value="<?php echo htmlspecialchars($content['about']['title']); ?>">
+                            <input type="text" id="about_title" name="about_title" value="<?php echo htmlspecialchars($current_content['about']['title']); ?>">
                             <div class="help-text">Use HTML for styling like &lt;span class="text-amber-500"&gt;Coach&lt;/span&gt;</div>
                         </div>
                         <div class="form-group">
                             <label for="about_description">Main Description:</label>
-                            <textarea id="about_description" name="about_description"><?php echo htmlspecialchars($content['about']['description']); ?></textarea>
+                            <textarea id="about_description" name="about_description"><?php echo htmlspecialchars($current_content['about']['description']); ?></textarea>
                         </div>
                         <div class="form-group">
                             <label for="about_extended_description">Extended Description:</label>
-                            <textarea id="about_extended_description" name="about_extended_description"><?php echo htmlspecialchars($content['about']['extended_description']); ?></textarea>
+                            <textarea id="about_extended_description" name="about_extended_description"><?php echo htmlspecialchars($current_content['about']['extended_description']); ?></textarea>
                         </div>
                     </div>
 
@@ -401,33 +405,33 @@ $content = array_merge_recursive($default_content, $current_content);
                         <h3>Services Section</h3>
                         <div class="form-group">
                             <label for="services_title">Section Title:</label>
-                            <input type="text" id="services_title" name="services_title" value="<?php echo htmlspecialchars($content['services']['title']); ?>">
+                            <input type="text" id="services_title" name="services_title" value="<?php echo htmlspecialchars($current_content['services']['title']); ?>">
                         </div>
                         <div class="grid">
                             <div>
                                 <div class="form-group">
                                     <label for="services_beginner_title">Beginner Column Title:</label>
-                                    <input type="text" id="services_beginner_title" name="services_beginner_title" value="<?php echo htmlspecialchars($content['services']['beginner_title']); ?>">
+                                    <input type="text" id="services_beginner_title" name="services_beginner_title" value="<?php echo htmlspecialchars($current_content['services']['beginner_title']); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="services_beginner_subtitle">Beginner Subtitle:</label>
-                                    <input type="text" id="services_beginner_subtitle" name="services_beginner_subtitle" value="<?php echo htmlspecialchars($content['services']['beginner_subtitle']); ?>">
+                                    <input type="text" id="services_beginner_subtitle" name="services_beginner_subtitle" value="<?php echo htmlspecialchars($current_content['services']['beginner_subtitle']); ?>">
                                 </div>
                             </div>
                             <div>
                                 <div class="form-group">
                                     <label for="services_competitive_title">Competitive Column Title:</label>
-                                    <input type="text" id="services_competitive_title" name="services_competitive_title" value="<?php echo htmlspecialchars($content['services']['competitive_title']); ?>">
+                                    <input type="text" id="services_competitive_title" name="services_competitive_title" value="<?php echo htmlspecialchars($current_content['services']['competitive_title']); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="services_competitive_subtitle">Competitive Subtitle:</label>
-                                    <input type="text" id="services_competitive_subtitle" name="services_competitive_subtitle" value="<?php echo htmlspecialchars($content['services']['competitive_subtitle']); ?>">
+                                    <input type="text" id="services_competitive_subtitle" name="services_competitive_subtitle" value="<?php echo htmlspecialchars($current_content['services']['competitive_subtitle']); ?>">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="services_additional_info">Additional Services Info:</label>
-                            <textarea id="services_additional_info" name="services_additional_info"><?php echo htmlspecialchars($content['services']['additional_info']); ?></textarea>
+                            <textarea id="services_additional_info" name="services_additional_info"><?php echo htmlspecialchars($current_content['services']['additional_info']); ?></textarea>
                         </div>
                     </div>
 
@@ -436,11 +440,11 @@ $content = array_merge_recursive($default_content, $current_content);
                         <h3>Coaching Approach</h3>
                         <div class="form-group">
                             <label for="approach_title">Section Title:</label>
-                            <input type="text" id="approach_title" name="approach_title" value="<?php echo htmlspecialchars($content['approach']['title']); ?>">
+                            <input type="text" id="approach_title" name="approach_title" value="<?php echo htmlspecialchars($current_content['approach']['title']); ?>">
                         </div>
                         <div class="form-group">
                             <label for="approach_intro">Introduction Text:</label>
-                            <textarea id="approach_intro" name="approach_intro"><?php echo htmlspecialchars($content['approach']['intro']); ?></textarea>
+                            <textarea id="approach_intro" name="approach_intro"><?php echo htmlspecialchars($current_content['approach']['intro']); ?></textarea>
                         </div>
                     </div>
 
@@ -450,20 +454,20 @@ $content = array_merge_recursive($default_content, $current_content);
                         <div class="grid">
                             <div class="form-group">
                                 <label for="contact_title">Section Title:</label>
-                                <input type="text" id="contact_title" name="contact_title" value="<?php echo htmlspecialchars($content['contact']['title']); ?>">
+                                <input type="text" id="contact_title" name="contact_title" value="<?php echo htmlspecialchars($current_content['contact']['title']); ?>">
                             </div>
                             <div class="form-group">
                                 <label for="contact_discord">Discord Username:</label>
-                                <input type="text" id="contact_discord" name="contact_discord" value="<?php echo htmlspecialchars($content['contact']['discord']); ?>">
+                                <input type="text" id="contact_discord" name="contact_discord" value="<?php echo htmlspecialchars($current_content['contact']['discord']); ?>">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="contact_subtitle">Subtitle:</label>
-                            <textarea id="contact_subtitle" name="contact_subtitle"><?php echo htmlspecialchars($content['contact']['subtitle']); ?></textarea>
+                            <textarea id="contact_subtitle" name="contact_subtitle"><?php echo htmlspecialchars($current_content['contact']['subtitle']); ?></textarea>
                         </div>
                         <div class="form-group">
                             <label for="contact_form_title">Contact Form Title:</label>
-                            <input type="text" id="contact_form_title" name="contact_form_title" value="<?php echo htmlspecialchars($content['contact']['form_title']); ?>">
+                            <input type="text" id="contact_form_title" name="contact_form_title" value="<?php echo htmlspecialchars($current_content['contact']['form_title']); ?>">
                         </div>
                     </div>
 
