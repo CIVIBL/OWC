@@ -98,11 +98,12 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
       setError(null);
       
       // Try to fetch from the PHP API first
-      const response = await fetch('/content-api.php', {
+      const response = await fetch('./content-api.php?' + Date.now(), {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         }
       });
       
@@ -112,6 +113,7 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
         // Check if we got valid content data
         if (data && typeof data === 'object' && !data.error) {
           setContent(data);
+          console.log('Content loaded from API:', data);
         } else {
           // If there's an error in the response, use default content
           console.warn('API returned error or invalid data:', data);
@@ -119,7 +121,7 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
         }
       } else {
         // If API request fails, use default content
-        console.warn('Failed to fetch from API, using default content');
+        console.warn('Failed to fetch from API (status:', response.status, '), using default content');
         setContent(defaultContent);
       }
       
