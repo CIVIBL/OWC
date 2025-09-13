@@ -97,17 +97,37 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch('/content-api.php');
+      // Try to fetch from the PHP API first
+      const response = await fetch('/content-api.php', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Check if we got valid content data
+        if (data && typeof data === 'object' && !data.error) {
+          setContent(data);
+        } else {
+          // If there's an error in the response, use default content
+          console.warn('API returned error or invalid data:', data);
+          setContent(defaultContent);
+        }
+      } else {
+        // If API request fails, use default content
+        console.warn('Failed to fetch from API, using default content');
+        setContent(defaultContent);
+      }
       
-      // Use default content since PHP is not available in development
-      setContent(defaultContent);
     } catch (err) {
       console.error('Error fetching content:', err);
+      // On any error, fall back to default content
       setContent(defaultContent);
-      setError(null); // Don't show error for development mode
+      setError(null);
     } finally {
       setIsLoading(false);
     }
