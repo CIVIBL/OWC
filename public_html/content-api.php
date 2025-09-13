@@ -56,8 +56,16 @@ try {
         if (json_last_error() !== JSON_ERROR_NONE || empty($content)) {
             $content = $default_content;
         } else {
-            // Merge with defaults to ensure all fields exist
-            $content = array_merge_recursive($default_content, $content);
+            // Replace defaults with loaded content, keeping defaults for missing fields only
+            foreach ($default_content as $section => $fields) {
+                if (isset($content[$section]) && is_array($content[$section])) {
+                    // Use loaded content for this section, but fill in any missing fields with defaults
+                    $content[$section] = array_merge($fields, $content[$section]);
+                } else {
+                    // Section doesn't exist in loaded content, use defaults
+                    $content[$section] = $fields;
+                }
+            }
         }
     } else {
         // File doesn't exist, use default content
