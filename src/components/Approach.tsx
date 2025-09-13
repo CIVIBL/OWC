@@ -1,7 +1,10 @@
 import React from 'react';
 import { Heart, Lightbulb, Users, Award } from 'lucide-react';
+import { useContent } from '../contexts/ContentContext';
 
 const Approach = () => {
+  const { content, isLoading } = useContent();
+
   const approaches = [
     {
       icon: <Heart className="h-12 w-12 text-red-500" />,
@@ -25,19 +28,29 @@ const Approach = () => {
     }
   ];
 
+  if (isLoading || !content) {
+    return (
+      <section id="approach" className="py-20 bg-gray-900">
+        <div className="container mx-auto px-6 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
+          <p className="text-white mt-4">Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="approach" className="py-20 bg-gray-900">
       <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Coaching <span className="text-amber-500">Approach</span>
-            </h2>
+            <h2 
+              className="text-4xl md:text-5xl font-bold text-white mb-6"
+              dangerouslySetInnerHTML={{ __html: content.approach.title }}
+            />
             <div className="w-24 h-1 bg-red-600 mx-auto mb-8"></div>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              My coaching philosophy combines technical expertise with personalized mentorship, 
-              ensuring you not only improve your gameplay but understand the fundamental 
-              concepts that drive long-term success.
+              {content.approach.intro}
             </p>
           </div>
 

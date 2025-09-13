@@ -1,7 +1,10 @@
 import React from 'react';
 import { BookOpen, Trophy, Target, Brain, Shield, Swords } from 'lucide-react';
+import { useContent } from '../contexts/ContentContext';
 
 const Services = () => {
+  const { content, isLoading } = useContent();
+
   const beginnerServices = [
     {
       icon: <BookOpen className="h-8 w-8" />,
@@ -48,14 +51,26 @@ const Services = () => {
     }
   ];
 
+  if (isLoading || !content) {
+    return (
+      <section id="services" className="py-20 bg-gray-800">
+        <div className="container mx-auto px-6 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
+          <p className="text-white mt-4">Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="services" className="py-20 bg-gray-800">
       <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Coaching <span className="text-amber-500">Services</span>
-            </h2>
+            <h2 
+              className="text-4xl md:text-5xl font-bold text-white mb-6"
+              dangerouslySetInnerHTML={{ __html: content.services.title }}
+            />
             <div className="w-24 h-1 bg-red-600 mx-auto"></div>
           </div>
 
@@ -64,8 +79,8 @@ const Services = () => {
             <div className="bg-gray-900 p-8 rounded-xl border border-gray-700">
               <div className="text-center mb-8">
                 <Shield className="h-16 w-16 text-amber-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-white mb-2">New to the Old World?</h3>
-                <p className="text-gray-400">Build a strong foundation for lasting success</p>
+                <h3 className="text-2xl font-bold text-white mb-2">{content.services.beginner_title}</h3>
+                <p className="text-gray-400">{content.services.beginner_subtitle}</p>
               </div>
 
               <div className="space-y-6">
@@ -87,8 +102,8 @@ const Services = () => {
             <div className="bg-gray-900 p-8 rounded-xl border border-gray-700">
               <div className="text-center mb-8">
                 <Trophy className="h-16 w-16 text-red-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-white mb-2">Ready to Compete?</h3>
-                <p className="text-gray-400">Elevate your game to tournament level</p>
+                <h3 className="text-2xl font-bold text-white mb-2">{content.services.competitive_title}</h3>
+                <p className="text-gray-400">{content.services.competitive_subtitle}</p>
               </div>
 
               <div className="space-y-6">
@@ -109,8 +124,7 @@ const Services = () => {
 
           <div className="mt-12 text-center">
             <p className="text-lg text-gray-300 mb-6">
-              Additional services include mental game preparation, multi-round event strategies, 
-              and avoiding common mistakes that cost games.
+              {content.services.additional_info}
             </p>
           </div>
         </div>

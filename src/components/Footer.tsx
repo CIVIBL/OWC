@@ -1,7 +1,10 @@
 import React from 'react';
 import { Crown, MessageCircle } from 'lucide-react';
+import { useContent } from '../contexts/ContentContext';
 
 const Footer = () => {
+  const { content } = useContent();
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -18,7 +21,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">
             <div className="flex items-center space-x-2 text-gray-300">
               <MessageCircle className="h-5 w-5 text-amber-500" />
-              <span>Discord: <span className="text-amber-500 font-medium">auce</span></span>
+              <span>Discord: <span className="text-amber-500 font-medium">{content?.contact?.discord || 'auce'}</span></span>
             </div>
             
             <button
@@ -32,7 +35,7 @@ const Footer = () => {
 
         <div className="mt-8 pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-400">
-            © 2025 Shayne Hall - Old World Coach. Master the battlefield with expert guidance.
+            © 2025 {content?.about?.name || 'Shayne Hall'} - Old World Coach. Master the battlefield with expert guidance.
           </p>
         </div>
       </div>

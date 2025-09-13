@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Mail, MessageCircle, Send, Crown } from 'lucide-react';
+import { useContent } from '../contexts/ContentContext';
 
 const Contact = () => {
+  const { content, isLoading } = useContent();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -52,17 +55,29 @@ const Contact = () => {
     });
   };
 
+  if (isLoading || !content) {
+    return (
+      <section id="contact" className="py-20 bg-gray-800">
+        <div className="container mx-auto px-6 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
+          <p className="text-white mt-4">Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="contact" className="py-20 bg-gray-800">
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Get <span className="text-amber-500">Started</span>
-            </h2>
+            <h2 
+              className="text-4xl md:text-5xl font-bold text-white mb-6"
+              dangerouslySetInnerHTML={{ __html: content.contact.title }}
+            />
             <div className="w-24 h-1 bg-red-600 mx-auto mb-8"></div>
             <p className="text-xl text-gray-300 leading-relaxed">
-              Ready to elevate your game? Let's discuss your goals and create a personalized coaching plan.
+              {content.contact.subtitle}
             </p>
           </div>
 
@@ -75,7 +90,7 @@ const Contact = () => {
                   <MessageCircle className="h-6 w-6 text-amber-500" />
                   <div>
                     <h4 className="text-lg font-semibold text-white">Discord</h4>
-                    <p className="text-amber-500 font-medium">auce</p>
+                    <p className="text-amber-500 font-medium">{content.contact.discord}</p>
                     <p className="text-gray-400 text-sm">Fastest way to reach me</p>
                   </div>
                 </div>
@@ -113,7 +128,7 @@ const Contact = () => {
             </div>
 
             <div className="bg-gray-900 p-8 rounded-xl">
-              <h3 className="text-2xl font-bold text-white mb-6">Send Me a Message</h3>
+              <h3 className="text-2xl font-bold text-white mb-6">{content.contact.form_title}</h3>
               
               {/* Status Messages */}
               {submitStatus === 'success' && (

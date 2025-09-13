@@ -1,5 +1,5 @@
 import React from 'react';
-import { ContentProvider } from './contents/ContentContext';
+import { ContentProvider } from './contexts/ContentContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
