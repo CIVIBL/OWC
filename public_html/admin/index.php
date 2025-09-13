@@ -58,6 +58,8 @@ if (isset($_POST['save_content']) && isset($_SESSION['admin_logged_in'])) {
     
     if (file_put_contents($content_file, json_encode($content, JSON_PRETTY_PRINT))) {
         $save_success = 'Content saved successfully!';
+        // Update current_content with the newly saved data
+        $current_content = $content;
     } else {
         $save_error = 'Failed to save content. Check file permissions.';
     }
