@@ -103,7 +103,7 @@ $default_content = [
     ]
 ];
 
-// Merge with defaults
+// Merge with defaults to ensure all fields exist
 $content = array_merge_recursive($default_content, $current_content);
 ?>
 
