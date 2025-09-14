@@ -22,7 +22,7 @@ const Contact = () => {
     setSubmitStatus('idle');
     
     try {
-      const response = await fetch('/contact-form.php', {
+      const response = await fetch('contact-form.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
